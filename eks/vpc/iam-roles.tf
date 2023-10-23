@@ -1,30 +1,7 @@
-
-locals {
-  eks_policies = [
-    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  ]
-  node_policies = [
-    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-    "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
-    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  ]
-}
-
 #Role and policies for node groups
 resource "aws_iam_role" "nodes" {
-  name = "eks-node-group-nodes"
-  assume_role_policy = jsonencode({
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-    Version = "2012-10-17"
-  })
+  name               = "eks-node-group-nodes"
+  assume_role_policy = data.aws_iam_policy_document.nodes.json
 }
 
 
@@ -36,17 +13,8 @@ resource "aws_iam_role_policy_attachment" "nodes-AmazonEKSWorkerNodePolicy" {
 
 #Role and policies for eks cluster
 resource "aws_iam_role" "demo" {
-  name = "eks-cluster-demo"
-  assume_role_policy = jsonencode({
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "eks.amazonaws.com"
-      }
-    }]
-    Version = "2012-10-17"
-  })
+  name               = "eks-cluster-demo"
+  assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
 }
 
 resource "aws_iam_role_policy_attachment" "demo-AmazonEKSClusterPolicy" {
